@@ -1,0 +1,268 @@
+// Code for complete deactivation
+		XposedHelpers.findAndHookMethod("com.android.internal.widget.LockPatternUtils", lpparam.classLoader, "isLockScreenDisabled", new XC_MethodReplacement() {
+
+			@Override
+			protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
+				// TODO Auto-generated method stub
+				if (prefs.getString("lockscreentype", "slide").equals("none")) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		});
+		
+		//possible Code for pre Android 4.3 Lockscreen?
+		XposedHelpers.findAndHookMethod("com.android.internal.widget.LockPatternUtils", lpparam.classLoader, "isSecure", new XC_MethodHook() {
+
+			@Override
+			protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+				if (prefs.getString("lockscreentype", "slide").equals("slide")) {
+					param.setResult(false);
+				}
+			}
+		});
+
+		// Code for Slide-To-Unlock
+		// Android 4.4
+		if (lpparam.packageName.contains("android.keyguard")) {
+			
+
+			XposedBridge.log("Keyguard Disabler: Loading Kitkat specific code");	
+			
+
+			securityModeEnum = XposedHelpers.findClass("com.android.keyguard.KeyguardSecurityModel$SecurityMode", lpparam.classLoader);
+			XposedBridge.log("SecurityEnum found and parsed");
+
+			XposedHelpers.findAndHookMethod("com.android.keyguard.KeyguardSecurityModel", lpparam.classLoader, "getSecurityMode", new XC_MethodHook() {
+
+				@Override
+				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+
+					if (prefs.getString("lockscreentype", "slide").equals("slide")) {
+
+						TelephonyManager manager = (TelephonyManager) ctx.getSystemService(Context.TELEPHONY_SERVICE);
+						if (manager.getSimState() == TelephonyManager.SIM_STATE_PIN_REQUIRED) {
+							XposedBridge.log("SIM PIN REQUIRED");
+							param.setResult(XposedHelpers.getStaticObjectField(securityModeEnum, "SimPin"));
+						} else if (manager.getSimState() == TelephonyManager.SIM_STATE_PUK_REQUIRED) {
+							XposedBridge.log("SIM PUK REQUIRED");
+							param.setResult(XposedHelpers.getStaticObjectField(securityModeEnum, "SimPuk"));
+						} else {
+							XposedBridge.log("Returning NO Security");
+							param.setResult(XposedHelpers.getStaticObjectField(securityModeEnum, "None"));
+						}
+					}
+				}
+			});
+
+		}
+
+		// Android < 4.4
+		else if (lpparam.packageName.contains("android.internal")) {
+
+			XposedBridge.log("Keyguard Disabler: Loading Jellybean specific code");
+
+			securityModeEnum = XposedHelpers.findClass("com.android.internal.policy.impl.keyguard.KeyguardSecurityModel$SecurityMode", lpparam.classLoader);
+			XposedBridge.log("SecurityEnum found and parsed");
+			XposedHelpers.findAndHookMethod("com.android.internal.policy.impl.keyguard.KeyguardSecurityModel", lpparam.classLoader, "getSecurityMode", new XC_MethodHook() {
+
+				@Override
+				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+					if (prefs.getString("lockscreentype", "slide").equals("slide")) {
+						TelephonyManager manager = (TelephonyManager) ctx.getSystemService(Context.TELEPHONY_SERVICE);
+						if (manager.getSimState() == TelephonyManager.SIM_STATE_PIN_REQUIRED) {
+							XposedBridge.log("SIM PIN REQUIRED");
+							param.setResult(XposedHelpers.getStaticObjectField(securityModeEnum, "SimPin"));
+						} else if (manager.getSimState() == TelephonyManager.SIM_STATE_PUK_REQUIRED) {
+							XposedBridge.log("SIM PUK REQUIRED");
+							param.setResult(XposedHelpers.getStaticObjectField(securityModeEnum, "SimPuk"));
+						} else {
+							XposedBridge.log("Returning NO Security");
+							param.setResult(XposedHelpers.getStaticObjectField(securityModeEnum, "None"));
+						}
+					}
+				}
+			});
+		}
+
+		// HTC
+		else if (lpparam.packageName.contains("com.htc.lockscreen")) {
+
+			XposedBridge.log("Keyguard Disabler: Loading HTC specific code");
+
+			securityModeEnum = XposedHelpers.findClass("com.htc.lockscreen.HtcKeyguardSecurityModel$SecurityMode", lpparam.classLoader);
+			XposedBridge.log("SecurityEnum (HTC) found and parsed");
+			XposedHelpers.findAndHookMethod("com.htc.lockscreen.HtcKeyguardSecurityModel", lpparam.classLoader, "getSecurityMode", new XC_MethodHook() {
+
+				@Override
+				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+					if (prefs.getString("lockscreentype", "slide").equals("slide")) {
+						TelephonyManager manager = (TelephonyManager) ctx.getSystemService(Context.TELEPHONY_SERVICE);
+						if (manager.getSimState() == TelephonyManager.SIM_STATE_PIN_REQUIRED) {
+							XposedBridge.log("SIM PIN REQUIRED (HTC)");
+							param.setResult(XposedHelpers.getStaticObjectField(securityModeEnum, "SimPin"));
+						} else if (manager.getSimState() == TelephonyManager.SIM_STATE_PUK_REQUIRED) {
+							XposedBridge.log("SIM PUK REQUIRED (HTC)");
+							param.setResult(XposedHelpers.getStaticObjectField(securityModeEnum, "SimPuk"));
+						} else {
+							XposedBridge.log("Returning NO Security (HTC)");
+							param.setResult(XposedHelpers.getStaticObjectField(securityModeEnum, "None"));
+						}
+					}
+				}
+			});
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		if (lpparam.packageName.contains("android.app.admin")) {
+			
+			XposedBridge.log("Keyguard Disabler: Loading Device Admin Code");				
+
+			XposedHelpers.findAndHookMethod("android.app.admin.DevicePolicyManager", lpparam.classLoader, "isActivePasswordSufficient", new XC_MethodHook() {
+				@Override
+				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("Keyguard Disabler: An application requested your password strength. Returning that you are using a mighty password ;)");	
+					param.setResult(true);
+				}
+			});
+			
+			XposedHelpers.findAndHookMethod("android.app.admin.DevicePolicyManager", lpparam.classLoader, "setPasswordQuality",  new XC_MethodHook() {
+				@Override
+				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("Keyguard Disabler: An application wants to change the password quality. Denied ;)");	
+					param.args[1] = 0;
+				}
+			});
+			
+			XposedHelpers.findAndHookMethod("android.app.admin.DevicePolicyManager", lpparam.classLoader, "setPasswordQuality",  new XC_MethodHook() {
+				@Override
+				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("Keyguard Disabler: An application wants to change the password quality. Denied ;)");	
+					param.args[1] = 0;
+				}
+			});
+			
+			XposedHelpers.findAndHookMethod("android.app.admin.DevicePolicyManager", lpparam.classLoader, "setPasswordMinimumLength",  new XC_MethodHook() {
+				@Override
+				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("Keyguard Disabler: An application wants to change the minimum password length. Denied ;)");	
+					param.args[1] = 0;
+				}
+			});
+			
+			XposedHelpers.findAndHookMethod("android.app.admin.DevicePolicyManager", lpparam.classLoader, "setPasswordMinimumUpperCase",  new XC_MethodHook() {
+				@Override
+				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("Keyguard Disabler: An application wants to change the minimum uppercase characters. Denied ;)");	
+					param.args[1] = 0;
+				}
+			});
+			
+			XposedHelpers.findAndHookMethod("android.app.admin.DevicePolicyManager", lpparam.classLoader, "setPasswordMinimumLowerCase",  new XC_MethodHook() {
+				@Override
+				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("Keyguard Disabler: An application wants to change the minimum lowercase characters. Denied ;)");	
+					param.args[1] = 0;
+				}
+			});
+
+			XposedHelpers.findAndHookMethod("android.app.admin.DevicePolicyManager", lpparam.classLoader, "setPasswordMinimumLetters",  new XC_MethodHook() {
+				@Override
+				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("Keyguard Disabler: An application wants to change the minimum number of letters. Denied ;)");	
+					param.args[1] = 0;
+				}
+			});
+			
+			XposedHelpers.findAndHookMethod("android.app.admin.DevicePolicyManager", lpparam.classLoader, "setPasswordMinimumNumeric",  new XC_MethodHook() {
+				@Override
+				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("Keyguard Disabler: An application wants to change the minimum number of numbers. Denied ;)");	
+					param.args[1] = 0;
+				}
+			});
+			
+			XposedHelpers.findAndHookMethod("android.app.admin.DevicePolicyManager", lpparam.classLoader, "setPasswordMinimumSymbols",  new XC_MethodHook() {
+				@Override
+				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("Keyguard Disabler: An application wants to change the minimum number of symbols. Denied ;)");	
+					param.args[1] = 0;
+				}
+			});
+			
+			XposedHelpers.findAndHookMethod("android.app.admin.DevicePolicyManager", lpparam.classLoader, "setPasswordMinimumNonLetter",  new XC_MethodHook() {
+				@Override
+				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("Keyguard Disabler: An application wants to change the minimum number of non letters. Denied ;)");	
+					param.args[1] = 0;
+				}
+			});
+			
+			XposedHelpers.findAndHookMethod("android.app.admin.DevicePolicyManager", lpparam.classLoader, "setPasswordHistoryLength",  new XC_MethodHook() {
+				@Override
+				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("Keyguard Disabler: An application wants to change the password history length. Denied ;)");	
+					param.args[1] = 0;
+				}
+			});
+			
+			XposedHelpers.findAndHookMethod("android.app.admin.DevicePolicyManager", lpparam.classLoader, "setPasswordExpirationTimeout",  new XC_MethodHook() {
+				@Override
+				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("Keyguard Disabler: An application wants to change the password password expiration. Denied ;)");	
+					param.args[1] = 0;
+				}
+			});
+
+		}		

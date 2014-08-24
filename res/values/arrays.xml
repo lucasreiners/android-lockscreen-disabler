@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="lockscreenType">
+        <item name="none">No Lockscreen</item>
+        <item name="slide">Slide-to-unlock</item>
+        <item name="device">Default (deactivates this mod!)</item>
+    </string-array>
+    <string-array name="lockscreenTypeValues">
+        <item name="none">none</item>
+        <item name="slide">slide</item>
+        <item name="device">device</item>
+    </string-array>
+</resources>

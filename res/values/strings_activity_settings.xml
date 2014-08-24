@@ -1,0 +1,11 @@
+<resources>
+
+    <string name="title_activity_settings">Keyaguard Disabler</string>
+
+    <string name="pref_header_general">General</string>
+    <string name="pref_description_status_on">Lockscreen is disabled by mocking that there is no password</string>
+    <string name="pref_description_status_off">Lockscreen is running as normal</string>
+    <string name="pref_title_status">Status</string>
+
+
+</resources>
