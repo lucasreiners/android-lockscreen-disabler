@@ -21,7 +21,6 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
 
 	@Override
 	public void initZygote(StartupParam startupParam) throws Throwable {
-		// TODO Auto-generated method stub
 		prefs = new XSharedPreferences("com.lr.keyguarddisabler");
 		prefs.makeWorldReadable();
 	}
@@ -36,7 +35,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
 
 			@Override
 			protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
-				// TODO Auto-generated method stub
+				prefs.reload();
 				if (prefs.getString("lockscreentype", "slide").equals("none")) {
 					return true;
 				} else {
@@ -50,6 +49,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
 
 			@Override
 			protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+				prefs.reload();
 				if (prefs.getString("lockscreentype", "slide").equals("slide")) {
 					param.setResult(false);
 				}
@@ -99,6 +99,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
 		
 			@Override
 			protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+				prefs.reload();
 				if (prefs.getString("lockscreentype", "slide").equals("slide")) {
 					TelephonyManager manager = (TelephonyManager) ctx.getSystemService(Context.TELEPHONY_SERVICE);
 					if (manager.getSimState() == TelephonyManager.SIM_STATE_PIN_REQUIRED) {
