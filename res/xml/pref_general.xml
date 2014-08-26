@@ -6,6 +6,11 @@
         android:key="lockscreentype"
         android:title="Lockscreen type"
         android:summary="Select your desired lockscreen type (none or slide-to-unlock)"/>
+    
+    <CheckBoxPreference 
+        android:key="logtofile"
+        android:title="Log"
+        android:summary="Toggle, if you want to log information and errors to Xposed log and logcat"/>
 
     <Preference
         android:key="support"
