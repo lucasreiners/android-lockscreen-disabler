@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.lr.keyguarddisabler"
-    android:versionCode="144"
-    android:versionName="1.4.4" >
+    android:versionCode="145"
+    android:versionName="1.4.5" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="17"
         android:targetSdkVersion="19" />
 
     <application
@@ -21,7 +21,7 @@
             android:value="2.0*" />
         <meta-data
             android:name="xposeddescription"
-            android:value="Mocks, that there is no device password set." />
+            android:value="@string/xposed_description" />
 
         <activity
             android:name="com.lr.keyguarddisabler.Settings"

@@ -8,6 +8,8 @@
     <string name="pref_log_sum">Toggle, if you want to log information and errors to Xposed log and logcat</string>
     <string name="pref_support_title">Support</string>
     
+    <string name="xposed_description">Replaces the Password/PIN keyguard for a given time interval to avoid having to re-log in each time the lockscreen is enabled.</string>
+    
     <string name="lockscreen_type_none">No Lockscreen</string>
     <string name="lockscreen_type_slide">Slide-to-unlock</string>
     <string name="lockscreen_type_device">Default (deactivates this mod!)</string>
