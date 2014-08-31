@@ -55,7 +55,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
 	public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable {
 
 		boolean foundPackage = false;
-	    
+
 		// Code for Slide-To-Unlock
 		// Android 4.4
 		if (lpparam.packageName.contains("android.keyguard")) {
@@ -126,9 +126,11 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
 		                // won't set any result value, allowing the normal method to be called.
 		            }
 		        });
-		    } else
+		    } 
+		    // Supposedly this allows < 4.2 to work...not for me.  Has anybody confirmed it?
+		    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1)
 		    {
-		        // Pretty sure this doesn't work  - but...
+		        // Pretty sure this doesn't work  - in theory it works for
 	            XposedHelpers.findAndHookMethod("com.android.internal.widget.LockPatternUtils", lpparam.classLoader, "isSecure", new XC_MethodHook() {
 
 	                @Override
@@ -177,7 +179,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
         }
         final Object securityModeKnockOn = tmpField;
 	    
-        if (LOG) XposedBridge.log("SecurityEnum (" + variant + ") found and parsed");
+        if (LOG) XposedBridge.log("Keyguard Disabler: SecurityEnum (" + variant + ") found and parsed");
 		
 		// We will know when the lockscreen is enabled or disabled, and update our lastLockTime
 		// appropriately.  In short, whenever the lock screen locks, our timer starts.  The one
@@ -187,7 +189,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
 		XposedHelpers.findAndHookMethod(mediatorClassName, lpparam.classLoader, "handleHide", new XC_MethodHook() {
 		    @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-		        if (LOG) XposedBridge.log("About to unlock...");        
+		        if (LOG) XposedBridge.log("Keyguard Disabler: About to unlock...");        
                 if (lastLockTime == 0)
                 {
                     lastLockTime = SystemClock.elapsedRealtime();
@@ -205,7 +207,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
                     // This ensures at initial bootup, we're always locked.
                     lastLockTime = SystemClock.elapsedRealtime();
                 }                
-                if (LOG) XposedBridge.log("We are locking...time to enforcement: "+((lockScreenTimeoutToEnforce - (SystemClock.elapsedRealtime() - lastLockTime)) / 1000));
+                if (LOG) XposedBridge.log("Keyguard Disabler: We are locking...time to enforcement: "+((lockScreenTimeoutToEnforce - (SystemClock.elapsedRealtime() - lastLockTime)) / 1000));
             }
         });
 
@@ -218,10 +220,18 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                 // Don't reload preferences here..it's too expensive for the frequency
                 // that this method gets called.  We'll reload on lock...
+                
+                // If they requested 'device' - this means they want the mod basically disabled,
+                // so we'll honor the device settings.
+                if (lockScreenType.equals(LOCK_SCREEN_TYPE_DEVICE))
+                {
+                    return;
+                }
+                
                 final long currTime = SystemClock.elapsedRealtime();
                 if ((lockScreenTimeoutToEnforce > 0) && ((currTime - lastLockTime) > lockScreenTimeoutToEnforce))
                 {
-                    if (LOG) XposedBridge.log("Lock as normal...time expired: "+((currTime - lastLockTime) / 1000 / 60)+" >= "+(lockScreenTimeoutToEnforce / 1000 / 60));
+                    if (LOG) XposedBridge.log("Keyguard Disabler: Lock as normal...time expired: "+((currTime - lastLockTime) / 1000 / 60)+" >= "+(lockScreenTimeoutToEnforce / 1000 / 60));
                     return;
                 } else
                 {
@@ -234,7 +244,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
                             securityModeKnockOn.equals(secModeResult))
                     {
                         param.setResult(securityModeNone);
-                        if (LOG) XposedBridge.log("Hiding the lock...time not expired: "+((currTime - lastLockTime) / 1000 / 60)+" <= "+(lockScreenTimeoutToEnforce / 1000 / 60));
+                        if (LOG) XposedBridge.log("Keyguard Disabler: Hiding the lock...time not expired: "+((currTime - lastLockTime) / 1000 / 60)+" <= "+(lockScreenTimeoutToEnforce / 1000 / 60));
                     }      
                 }
             }
