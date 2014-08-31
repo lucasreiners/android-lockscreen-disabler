@@ -63,7 +63,6 @@ public class Settings extends PreferenceActivity {
         getPreferenceManager().setSharedPreferencesMode(MODE_WORLD_READABLE);
 		addPreferencesFromResource(R.xml.pref_general);
 		
-		
 		Preference supportPref = (Preference) findPreference("support");
 		supportPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 			
@@ -74,36 +73,13 @@ public class Settings extends PreferenceActivity {
 			}
 		});
 		
-		
-		ListPreference typePref = (ListPreference) findPreference("lockscreentype");
-		typePref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
-			
-			@Override
-			public boolean onPreferenceChange(Preference preference, Object newValue) {
-				
-						
-				
-				
-				return true;
-			}
-		});
-		
-			
-		
-
-		/*
-		// Add 'notifications' preferences, and a corresponding header.
-		PreferenceCategory fakeHeader = new PreferenceCategory(this);
-		fakeHeader.setTitle(R.string.pref_header_notifications);
-		getPreferenceScreen().addPreference(fakeHeader);
-		addPreferencesFromResource(R.xml.pref_notification);
-
-		// Add 'data and sync' preferences, and a corresponding header.
-		fakeHeader = new PreferenceCategory(this);
-		fakeHeader.setTitle(R.string.pref_header_data_sync);
-		getPreferenceScreen().addPreference(fakeHeader);
-		addPreferencesFromResource(R.xml.pref_data_sync);
-		*/
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1)
+		{		
+		    ListPreference typePref = (ListPreference) findPreference("lockscreentype");
+            typePref.setEntries(R.array.lockscreenTypePreJellyBean);
+            typePref.setEntryValues(R.array.lockscreenTypeValuesPreJellyBean);
+            typePref.setDefaultValue("none");
+		}
 	}
 
 	/** {@inheritDoc} */
@@ -154,6 +130,24 @@ public class Settings extends PreferenceActivity {
 			// Make them world readable so the xposed module can reload them at runtime
 			getPreferenceManager().setSharedPreferencesMode(MODE_WORLD_READABLE);
 			addPreferencesFromResource(R.xml.pref_general);
+			
+	        Preference supportPref = (Preference) findPreference("support");
+	        supportPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+	            
+	            @Override
+	            public boolean onPreferenceClick(Preference preference) {
+	                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://forum.xda-developers.com/showthread.php?t=2587192")));
+	                return false;
+	            }
+	        });
+	        
+	        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1)
+	        {       
+	            ListPreference typePref = (ListPreference) findPreference("lockscreentype");
+	            typePref.setEntries(R.array.lockscreenTypePreJellyBean);
+	            typePref.setEntryValues(R.array.lockscreenTypeValuesPreJellyBean);
+	            typePref.setDefaultValue("none");
+	        }
 		}
 	}
 }

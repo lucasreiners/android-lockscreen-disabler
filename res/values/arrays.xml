@@ -10,6 +10,14 @@
         <item name="slide">slide</item>
         <item name="device">device</item>
     </string-array>
+    <string-array name="lockscreenTypePreJellyBean">
+        <item name="none">@string/lockscreen_type_none</item>
+        <item name="device">@string/lockscreen_type_device</item>
+    </string-array>
+    <string-array name="lockscreenTypeValuesPreJellyBean">
+        <item name="none">none</item>
+        <item name="device">device</item>
+    </string-array>
     <string-array name="lockscreenTimeout">
         <item name="one">@string/lockscreen_timeout_one</item>
         <item name="five">@string/lockscreen_timeout_five</item>
