@@ -1,13 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="lockscreenType">
-        <item name="none">No Lockscreen</item>
-        <item name="slide">Slide-to-unlock</item>
-        <item name="device">Default (deactivates this mod!)</item>
+        <item name="none">@string/lockscreen_type_none</item>
+        <item name="slide">@string/lockscreen_type_slide</item>
+        <item name="device">@string/lockscreen_type_device</item>
     </string-array>
     <string-array name="lockscreenTypeValues">
         <item name="none">none</item>
         <item name="slide">slide</item>
         <item name="device">device</item>
+    </string-array>
+    <string-array name="lockscreenTimeout">
+        <item name="one">@string/lockscreen_timeout_one</item>
+        <item name="five">@string/lockscreen_timeout_five</item>
+        <item name="ten">@string/lockscreen_timeout_ten</item>
+        <item name="twenty">@string/lockscreen_timeout_twenty</item>        
+        <item name="thirty">@string/lockscreen_timeout_thirty</item>        
+        <item name="sixty">@string/lockscreen_timeout_sixty</item>       
+        <item name="never">@string/lockscreen_timeout_never</item>
+    </string-array>
+    <string-array name="lockscreenTimeoutValues">
+        <item name="one">1</item>
+        <item name="five">5</item>
+        <item name="ten">10</item>
+        <item name="twenty">20</item>        
+        <item name="thirty">30</item>        
+        <item name="sixty">60</item>       
+        <item name="never">0</item>
     </string-array>
 </resources>

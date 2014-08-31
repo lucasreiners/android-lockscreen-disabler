@@ -1,11 +1,22 @@
-<resources>
-
-    <string name="title_activity_settings">Keyaguard Disabler</string>
-
+<resources><string name="title_activity_settings">Keyguard Disabler</string>
     <string name="pref_header_general">General</string>
-    <string name="pref_description_status_on">Lockscreen is disabled by mocking that there is no password</string>
-    <string name="pref_description_status_off">Lockscreen is running as normal</string>
-    <string name="pref_title_status">Status</string>
-
+    <string name="pref_lockscreen_type_title">Lockscreen type</string>
+    <string name="pref_lockscreen_type_sum">Select your desired lockscreen type (none or slide-to-unlock)</string>
+    <string name="pref_lockscreen_enforcement_title">Lockscreen Enforcement Timeout</string>
+    <string name="pref_lockscreen_enforcement_sum">How long before you are forced to re-authenticate (normal Password/Pattern/PIN)</string>
+    <string name="pref_log_title">Log</string>
+    <string name="pref_log_sum">Toggle, if you want to log information and errors to Xposed log and logcat</string>
+    <string name="pref_support_title">Support</string>
+    
+    <string name="lockscreen_type_none">No Lockscreen</string>
+    <string name="lockscreen_type_slide">Slide-to-unlock</string>
+    <string name="lockscreen_type_device">Default (deactivates this mod!)</string>
+    <string name="lockscreen_timeout_one">1 minute</string>
+    <string name="lockscreen_timeout_five">5 minutes</string>
+    <string name="lockscreen_timeout_ten">10 minutes</string>
+    <string name="lockscreen_timeout_twenty">20 minutes</string>
+    <string name="lockscreen_timeout_thirty">30 minutes</string>
+    <string name="lockscreen_timeout_sixty">60 minutes</string>
+    <string name="lockscreen_timeout_never">Never force re-authentication</string>
 
 </resources>

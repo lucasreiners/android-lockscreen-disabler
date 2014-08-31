@@ -4,17 +4,26 @@
         android:entries="@array/lockscreenType"
         android:entryValues="@array/lockscreenTypeValues"
         android:key="lockscreentype"
-        android:title="Lockscreen type"
-        android:summary="Select your desired lockscreen type (none or slide-to-unlock)"/>
+        android:title="@string/pref_lockscreen_type_title"
+        android:summary="@string/pref_lockscreen_type_sum"
+        android:defaultValue="slide"/>
+    
+    <ListPreference
+        android:entries="@array/lockscreenTimeout"
+        android:entryValues="@array/lockscreenTimeoutValues"
+        android:key="lockscreentimeout"
+        android:title="@string/pref_lockscreen_enforcement_title"
+        android:summary="@string/pref_lockscreen_enforcement_sum" 
+        android:defaultValue="0"/>
     
     <CheckBoxPreference 
         android:key="logtofile"
-        android:title="Log"
-        android:summary="Toggle, if you want to log information and errors to Xposed log and logcat"/>
+        android:title="@string/pref_log_title"
+        android:summary="@string/pref_log_sum"/>
 
     <Preference
         android:key="support"
         android:summary="http://forum.xda-developers.com/showthread.php?t=2587192"
-        android:title="Support" />
+        android:title="@string/pref_support_title" />
 
 </PreferenceScreen>

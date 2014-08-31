@@ -59,6 +59,8 @@ public class Settings extends PreferenceActivity {
 		// use the older PreferenceActivity APIs.
 
 		// Add 'general' preferences.
+        // Make them world readable so the xposed module can reload them at runtime
+        getPreferenceManager().setSharedPreferencesMode(MODE_WORLD_READABLE);
 		addPreferencesFromResource(R.xml.pref_general);
 		
 		
@@ -149,6 +151,8 @@ public class Settings extends PreferenceActivity {
 		@Override
 		public void onCreate(Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
+			// Make them world readable so the xposed module can reload them at runtime
+			getPreferenceManager().setSharedPreferencesMode(MODE_WORLD_READABLE);
 			addPreferencesFromResource(R.xml.pref_general);
 		}
 	}
