@@ -1,0 +1,22 @@
+apply plugin: 'com.android.application'
+android {
+    compileSdkVersion 19
+    buildToolsVersion "20.0.0"
+
+    defaultConfig {
+        applicationId "com.lr.keyguarddisabler"
+        minSdkVersion 10
+        targetSdkVersion 19
+    }
+
+    buildTypes {
+        release {
+            runProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+}
+
+dependencies {
+    compile files('src/main/assets/XposedBridgeApi.jar')
+}
