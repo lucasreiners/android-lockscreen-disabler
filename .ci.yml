@@ -1,4 +1,8 @@
 image: ksoichiro/android-emulator
 run_params: "-v `pwd`:/workspace start-emulator"
+<<<<<<< HEAD
 command:
   - "./gradlew connectedAndroidTest"
+=======
+command: "./gradlew connectedAndroidTest"
+>>>>>>> origin/feature/dockerize-builds
