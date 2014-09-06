@@ -1,6 +1,6 @@
 environment:
   # vars:
-  language: java
+  language: android
   image: wasabeef/android
   # services:
 
@@ -15,7 +15,7 @@ build:
   run:
     unit: ./gradlew lint
     # integration: 
-    acceptance: ./gradlew install-debug
+    acceptance: ./gradlew connectedDebugTest
 
   # after:
 
