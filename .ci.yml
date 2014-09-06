@@ -1,8 +1,9 @@
 environment:
   image: ksoichiro/android-emulator
-  run_params: "-v `pwd`:/workspace start-emulator"
+#  run_params: "-v `pwd`:/workspace"
 
 build:
   run:
+    - ./start-emulator
     - ./gradlew connectedAndroidTest
 
