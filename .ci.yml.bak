@@ -1,0 +1,4 @@
+image: ksoichiro/android-emulator
+run_params: "-v `pwd`:/workspace start-emulator"
+command:
+  - "./gradlew connectedAndroidTest"
