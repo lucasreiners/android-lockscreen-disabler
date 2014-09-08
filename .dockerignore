@@ -1,0 +1,6 @@
+.git/
+.gitignore
+code/local.properties
+# code/build/
+# code/app/build/
+# Dockerfile
