@@ -54,6 +54,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
 	@Override
 	public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable {
 
+        boolean foundPackage = true;
 		// Android 4.4
 		if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) && lpparam.packageName.contains("android.keyguard")) {
 		    if (LOG) XposedBridge.log("Keyguard Disabler: Loading Kitkat specific code");
@@ -107,7 +108,37 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
                     "NOT_USED",
                     "com.android.internal.policy.impl.KeyguardViewMediator", 
                     "Android < 4.2");
-		}		
+		}
+
+        // Check to hook the settings app
+        else if (lpparam.packageName.equals("com.android.settings"))
+        {
+            // Nothing to do here - simply a clearer way of indicating that we found an interesting package to hook to.
+        }
+
+        // Else, we didn't find the package.
+        else
+        {
+            foundPackage = false;
+        }
+
+        if (foundPackage)
+        {
+            // This does 2 things:
+            // 1)  It allows the settings app to show that 'Swipe' is the default, and therefore gives the ability to customize
+            //     your swipe settings
+            // 2)  It let's the notification drop down be available on the swipe lock screen.
+            XposedHelpers.findAndHookMethod("com.android.internal.widget.LockPatternUtils", lpparam.classLoader, "isSecure", new XC_MethodHook() {
+
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    if (LOG) XposedBridge.log("Keyguard Disabler: isSecure called by: "+lpparam.packageName);
+                    if (lockScreenType.equals(LOCK_SCREEN_TYPE_SLIDE)) {
+                        param.setResult(false);
+                    }
+                }
+            });
+        }
 	}
 
 	/**
