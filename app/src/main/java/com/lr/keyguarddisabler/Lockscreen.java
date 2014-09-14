@@ -25,7 +25,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
     private int lockScreenTimeoutToEnforce;
     private String lockScreenType = LOCK_SCREEN_TYPE_SLIDE;
     private boolean LOG = false;
-    private boolean resecuredStatsuBar = false;
+    private boolean resecuredStatusBar = false;
     private boolean isLocked = true;
 
     final private static String LOCK_SCREEN_TYPE_NONE   = "none";
@@ -57,7 +57,6 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
     @Override
     public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable {
 
-        boolean foundPackage = true;
         String keyguardViewMediatorClassName = null;
         // Android 4.4
         if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) && lpparam.packageName.contains("android.keyguard")) {
@@ -65,7 +64,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
             hookAllNeededMethods(lpparam,
                     "com.android.keyguard.KeyguardSecurityModel$SecurityMode",
                     "com.android.keyguard.KeyguardSecurityModel",
-                    keyguardViewMediatorClassName = "com.android.keyguard.KeyguardViewMediator",
+                    "com.android.keyguard.KeyguardViewMediator",
                     "Android 4.4");
 
         }
@@ -76,7 +75,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
             hookAllNeededMethods(lpparam,
                     "com.android.internal.policy.impl.keyguard.KeyguardSecurityModel$SecurityMode",
                     "com.android.internal.policy.impl.keyguard.KeyguardSecurityModel",
-                    keyguardViewMediatorClassName = "com.android.internal.policy.impl.keyguard.KeyguardViewMediator",
+                    "com.android.internal.policy.impl.keyguard.KeyguardViewMediator",
                     "Android > 4.2");
         }
 
@@ -89,7 +88,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
                 hookAllNeededMethods(lpparam,
                         "com.htc.lockscreen.HtcKeyguardSecurityModel$SecurityMode",
                         "com.htc.lockscreen.HtcKeyguardSecurityModel",
-                        keyguardViewMediatorClassName = "com.htc.lockscreen.HtcKeyguardViewMediator",
+                        "com.htc.lockscreen.HtcKeyguardViewMediator",
                         "HTC Sense 5.x");
 
             } catch (ClassNotFoundError ex) {
@@ -97,7 +96,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
                 hookAllNeededMethods(lpparam,
                         "com.htc.lockscreen.keyguard.KeyguardSecurityModel$SecurityMode",
                         "com.htc.lockscreen.keyguard.KeyguardSecurityModel",
-                        keyguardViewMediatorClassName = "com.htc.lockscreen.keyguard.KeyguardViewMediator",
+                        "com.htc.lockscreen.keyguard.KeyguardViewMediator",
                         "HTC Sense 6");
             }
         }
@@ -110,7 +109,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
             hookAllNeededMethods(lpparam,
                     "NOT_USED",
                     "NOT_USED",
-                    keyguardViewMediatorClassName = "com.android.internal.policy.impl.KeyguardViewMediator",
+                    "com.android.internal.policy.impl.KeyguardViewMediator",
                     "Android < 4.2");
         }
 
@@ -138,7 +137,6 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
         // Else, we didn't find the package.
         else
         {
-            foundPackage = false;
             // Add a log of what packages we are NOT hooking for debug purposes.  This helps us identify
             // if there are weird OEM keyguard packages (such as HTC) that we can try and handle.  This
             // Will pollute the log, but should prove helpful (and is off by default).
@@ -195,7 +193,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                 if (LOG) XposedBridge.log("Keyguard Disabler: About to unlock...");
-                resecuredStatsuBar = false;
+                resecuredStatusBar = false;
                 isLocked = false;
                 if (lastLockTime == 0)
                 {
@@ -243,8 +241,8 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
                         if (hideLockBasedOnTimer())
                         {
                             param.setResult(false);
-                        } else if (!resecuredStatsuBar && isLocked) {
-                            resecuredStatsuBar = true;
+                        } else if (!resecuredStatusBar && isLocked) {
+                            resecuredStatusBar = true;
                             XposedHelpers.callMethod(param.thisObject, "adjustStatusBarLocked");
                             if (LOG) XposedBridge.log("Keyguard Disabler: isSecure called when locked - making sure status bar is secure...");
                         }
