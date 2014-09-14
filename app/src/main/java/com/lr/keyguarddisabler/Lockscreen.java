@@ -3,6 +3,7 @@ package com.lr.keyguarddisabler;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
+
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
 import de.robv.android.xposed.XC_MethodHook;
@@ -28,8 +29,8 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
     private boolean resecuredStatusBar = false;
     private boolean isLocked = true;
 
-    final private static String LOCK_SCREEN_TYPE_NONE   = "none";
-    final private static String LOCK_SCREEN_TYPE_SLIDE  = "slide";
+    final private static String LOCK_SCREEN_TYPE_NONE = "none";
+    final private static String LOCK_SCREEN_TYPE_SLIDE = "slide";
     final private static String LOCK_SCREEN_TYPE_DEVICE = "device";
 
     @Override
@@ -46,8 +47,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
      * Reload our preferences from file, and update
      * any class variables that reflect preference values.
      */
-    private void reloadPrefs()
-    {
+    private void reloadPrefs() {
         prefs.reload();
         lockScreenTimeoutToEnforce = Integer.parseInt(prefs.getString("lockscreentimeout", "1")) * 60 * 1000;
         LOG = prefs.getBoolean("logtofile", false);
@@ -57,7 +57,6 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
     @Override
     public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable {
 
-        String keyguardViewMediatorClassName = null;
         // Android 4.4
         if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) && lpparam.packageName.contains("android.keyguard")) {
             if (LOG) XposedBridge.log("Keyguard Disabler: Loading Kitkat specific code");
@@ -102,8 +101,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
         }
 
         // Android < 4.2
-        else if ((Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) && lpparam.packageName.equals("android"))
-        {
+        else if ((Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) && lpparam.packageName.equals("android")) {
             // This only works for completely disabling screen - not for slide.
             if (LOG) XposedBridge.log("Keyguard Disabler: Loading < Jellybean MR1 specific code");
             hookAllNeededMethods(lpparam,
@@ -114,8 +112,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
         }
 
         // Check to hook the settings app
-        else if (lpparam.packageName.equals("com.android.settings"))
-        {
+        else if (lpparam.packageName.equals("com.android.settings")) {
             // This allows the settings app to show that 'Swipe' is the default, and therefore gives the ability to customize
             // your swipe settings
             XposedHelpers.findAndHookMethod("com.android.internal.widget.LockPatternUtils", lpparam.classLoader, "isSecure", new XC_MethodHook() {
@@ -129,18 +126,18 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
                             setResult = true;
                         }
                     }
-                    if (LOG) XposedBridge.log("Keyguard Disabler: isSecure called by: "+lpparam.packageName + ".  Result overriden to false? " + setResult);
+                    if (LOG)
+                        XposedBridge.log("Keyguard Disabler: isSecure called by: " + lpparam.packageName + ".  Result overriden to false? " + setResult);
                 }
             });
         }
 
         // Else, we didn't find the package.
-        else
-        {
+        else {
             // Add a log of what packages we are NOT hooking for debug purposes.  This helps us identify
             // if there are weird OEM keyguard packages (such as HTC) that we can try and handle.  This
             // Will pollute the log, but should prove helpful (and is off by default).
-            if (LOG) XposedBridge.log("Keyguard Disabler: Avoid Hooking package: "+lpparam.packageName);
+            if (LOG) XposedBridge.log("Keyguard Disabler: Avoid Hooking package: " + lpparam.packageName);
         }
     }
 
@@ -148,6 +145,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
      * Helper method to handle various incarnations of getSecurityMode.  Generally, it will
      * return a security mode of None if we want the keyguard disabled, otherwise it returns
      * the normal value.
+     *
      * @param lpparam
      * @param nestedClassName
      * @param outerClassName
@@ -166,20 +164,16 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
             @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 reloadPrefs();
-                if (lockScreenType.equals(LOCK_SCREEN_TYPE_NONE))
-                {
-                    if ((lastLockTime != 0) && hideLockBasedOnTimer())
-                    {
+                if (lockScreenType.equals(LOCK_SCREEN_TYPE_NONE)) {
+                    if ((lastLockTime != 0) && hideLockBasedOnTimer()) {
                         param.setResult(null);
                     }
                 }
             }
         };
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
-        {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             XposedHelpers.findAndHookMethod(mediatorClassName, lpparam.classLoader, "showLocked", Bundle.class, showLockedMethodHook);
-        } else
-        {
+        } else {
             XposedHelpers.findAndHookMethod(mediatorClassName, lpparam.classLoader, "showLocked", showLockedMethodHook);
         }
 
@@ -195,8 +189,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
                 if (LOG) XposedBridge.log("Keyguard Disabler: About to unlock...");
                 resecuredStatusBar = false;
                 isLocked = false;
-                if (lastLockTime == 0)
-                {
+                if (lastLockTime == 0) {
                     lastLockTime = SystemClock.elapsedRealtime();
                 }
             }
@@ -206,30 +199,26 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
         XC_MethodHook handleShowMethodHook = new XC_MethodHook() {
             @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                if (lastLockTime != 0)
-                {
+                if (lastLockTime != 0) {
                     // If not zero, we'll set it to now. If zero, we'll set it when we first unlock
                     // This ensures at initial bootup, we're always locked.
                     lastLockTime = SystemClock.elapsedRealtime();
                 }
                 isLocked = true;
-                if (LOG) XposedBridge.log("Keyguard Disabler: We are locking...time to enforcement: "+((lockScreenTimeoutToEnforce - (SystemClock.elapsedRealtime() - lastLockTime)) / 1000));
+                if (LOG)
+                    XposedBridge.log("Keyguard Disabler: We are locking...time to enforcement: " + ((lockScreenTimeoutToEnforce - (SystemClock.elapsedRealtime() - lastLockTime)) / 1000));
             }
         };
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
-        {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             XposedHelpers.findAndHookMethod(mediatorClassName, lpparam.classLoader, "handleShow", Bundle.class, handleShowMethodHook);
-        } else
-        {
+        } else {
             XposedHelpers.findAndHookMethod(mediatorClassName, lpparam.classLoader, "handleShow", handleShowMethodHook);
         }
 
 
-
         // Honoring 'slide' only works on jellybean MR1 and later
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
-        {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             // We'll hook isSecure() directly on the mediator class in order to be able to fixup the status
             // bar after being insecure.
             XposedHelpers.findAndHookMethod(mediatorClassName, lpparam.classLoader, "isSecure", new XC_MethodHook() {
@@ -238,8 +227,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                     boolean setResult = false;
                     if (lockScreenType.equals(LOCK_SCREEN_TYPE_SLIDE)) {
-                        if (hideLockBasedOnTimer())
-                        {
+                        if (hideLockBasedOnTimer()) {
                             param.setResult(false);
                         } else if (!resecuredStatusBar && isLocked) {
                             resecuredStatusBar = true;
@@ -261,9 +249,8 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
             Object tmpField;
             try {
                 tmpField = XposedHelpers.getStaticObjectField(securityModeEnum, "KnockOn");
-            } catch (NoSuchFieldError nsfe)
-            {
-                tmpField = "bad_field "+nsfe.getMessage();
+            } catch (NoSuchFieldError nsfe) {
+                tmpField = "bad_field " + nsfe.getMessage();
             }
             final Object securityModeKnockOn = tmpField;
 
@@ -282,23 +269,20 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
 
                     // If they requested 'device' - this means they want the mod basically disabled,
                     // so we'll honor the device settings.
-                    if (lockScreenType.equals(LOCK_SCREEN_TYPE_DEVICE))
-                    {
+                    if (lockScreenType.equals(LOCK_SCREEN_TYPE_DEVICE)) {
                         return;
                     }
 
-                    if (hideLockBasedOnTimer())
-                    {
+                    if (hideLockBasedOnTimer()) {
                         // Only hide things if we're in password, pattern, pin, biometric, or knock on.
                         // If we're in various SIM modes, we want to show things as normal.
                         Object secModeResult = param.getResult();
-                        if (LOG) XposedBridge.log("Keyguard Disabler: secMode is: "+secModeResult);
+                        if (LOG) XposedBridge.log("Keyguard Disabler: secMode is: " + secModeResult);
                         if (securityModePassword.equals(secModeResult) ||
                                 securityModePattern.equals(secModeResult) ||
                                 securityModePin.equals(secModeResult) ||
                                 securityModeBiometric.equals(secModeResult) ||
-                                securityModeKnockOn.equals(secModeResult))
-                        {
+                                securityModeKnockOn.equals(secModeResult)) {
                             param.setResult(securityModeNone);
                         }
                     }
@@ -310,23 +294,22 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
     /**
      * Calculates whether to hide the lockscreen based on current enforcement timer values.  Split
      * out into it's own helper method as there are 2 places that utilize this.
+     *
      * @return True if we should hide the lockscreen.
      */
-    private boolean hideLockBasedOnTimer()
-    {
-        if (lastLockTime == 0)
-        {
+    private boolean hideLockBasedOnTimer() {
+        if (lastLockTime == 0) {
             if (LOG) XposedBridge.log("Keyguard Disabler: First boot - lock as normal");
             return false;
         }
         final long currTime = SystemClock.elapsedRealtime();
-        if ((lockScreenTimeoutToEnforce > 0) && ((currTime - lastLockTime) > lockScreenTimeoutToEnforce))
-        {
-            if (LOG) XposedBridge.log("Keyguard Disabler: Lock as normal...time expired: "+((currTime - lastLockTime) / 1000 / 60)+" >= "+(lockScreenTimeoutToEnforce / 1000 / 60));
+        if ((lockScreenTimeoutToEnforce > 0) && ((currTime - lastLockTime) > lockScreenTimeoutToEnforce)) {
+            if (LOG)
+                XposedBridge.log("Keyguard Disabler: Lock as normal...time expired: " + ((currTime - lastLockTime) / 1000 / 60) + " >= " + (lockScreenTimeoutToEnforce / 1000 / 60));
             return false;
-        } else
-        {
-            if (LOG) XposedBridge.log("Keyguard Disabler: Hiding the lock...time not expired: "+((currTime - lastLockTime) / 1000 / 60)+" <= "+(lockScreenTimeoutToEnforce / 1000 / 60));
+        } else {
+            if (LOG)
+                XposedBridge.log("Keyguard Disabler: Hiding the lock...time not expired: " + ((currTime - lastLockTime) / 1000 / 60) + " <= " + (lockScreenTimeoutToEnforce / 1000 / 60));
             return true;
         }
     }
