@@ -66,6 +66,14 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
                     "com.android.keyguard.KeyguardViewMediator",
                     "Android 4.4");
 
+        } else if (lpparam.packageName.contains("cyngn.keyguard")) {
+            if (LOG) XposedBridge.log("Keyguard Disabler: Loading OnePlus One CM11S specific code");
+            hookAllNeededMethods(lpparam,
+                    "com.cyngn.keyguard.KeyguardSecurityModel$SecurityMode",
+                    "com.cyngn.keyguard.KeyguardSecurityModel",
+                    "com.cyngn.keyguard.KeyguardViewMediator",
+                    "OnePlus One CM11S");
+
         }
 
         // Android > 4.2
