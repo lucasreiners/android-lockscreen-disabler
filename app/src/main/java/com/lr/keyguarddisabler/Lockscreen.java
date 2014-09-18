@@ -127,15 +127,11 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
 
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                    boolean setResult = false;
+                    // This is for settings - so no need to hide based on a timer since by definition we're unlocked if this triggers.
                     if (lockScreenType.equals(LOCK_SCREEN_TYPE_SLIDE)) {
-                        if (hideLockBasedOnTimer()) {
-                            param.setResult(false);
-                            setResult = true;
-                        }
+                        param.setResult(false);
                     }
-                    if (LOG)
-                        XposedBridge.log("Keyguard Disabler: isSecure called by: " + lpparam.packageName + ".  Result overriden to false? " + setResult);
+                    if (LOG) XposedBridge.log("Keyguard Disabler: isSecure called by: " + lpparam.packageName);
                 }
             });
         }
