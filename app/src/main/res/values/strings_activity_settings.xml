@@ -1,4 +1,4 @@
-<resources><string name="title_activity_settings">Keyguard Disabler</string>
+<resources><string name="title_activity_settings">Lockscreen Disabler</string>
     <string name="pref_header_general">General</string>
     <string name="pref_lockscreen_type_title">Lockscreen type</string>
     <string name="pref_lockscreen_type_sum">Select your desired lockscreen type (none or slide-to-unlock)</string>
@@ -8,7 +8,7 @@
     <string name="pref_log_sum">Toggle, if you want to log information and errors to Xposed log and logcat</string>
     <string name="pref_support_title">Support</string>
     
-    <string name="xposed_description">Replaces the Password/PIN keyguard for a given time interval to avoid having to re-log in each time the lockscreen is enabled.</string>
+    <string name="xposed_description">Replaces the Password/PIN lockscreen for a given time interval to avoid having to re-log in each time the lockscreen is enabled.</string>
     
     <string name="lockscreen_type_none">No Lockscreen</string>
     <string name="lockscreen_type_slide">Slide-to-unlock</string>
