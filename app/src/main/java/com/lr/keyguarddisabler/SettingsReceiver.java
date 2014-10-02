@@ -31,13 +31,12 @@ public class SettingsReceiver extends BroadcastReceiver {
     Log.i(TAG, "SettingsReceiver:" + action);
 
     // Get the shared preferences to store the new lockscreentype value
-    SharedPreferences sp = context.getSharedPreferences("com.lr.keyguarddisabler_preferences", context.MODE_PRIVATE);
+    SharedPreferences sp = context.getSharedPreferences("com.lr.keyguarddisabler_preferences", context.MODE_WORLD_READABLE);
     SharedPreferences.Editor editor = sp.edit();
 
     // Get the value from the intent extra and store it in preference
     String lockScreenValue = intent.getStringExtra("lockscreentype");
     Log.i(TAG, "Lock screen value to set: " + lockScreenValue);
     Boolean done = editor.putString("lockscreentype", lockScreenValue).commit();
-    Log.i(TAG, "Lock screen value from preferences: " + sp.getString("lockscreentype", "not set"));
   }
 }
