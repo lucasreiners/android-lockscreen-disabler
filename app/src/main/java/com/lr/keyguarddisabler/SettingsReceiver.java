@@ -18,26 +18,26 @@ import android.util.Log;
  * <p> adb shell am broadcast -a com.lr.keyguarddisabler.action.SET_PREFERENCE -e lockscreentype device
  */
 public class SettingsReceiver extends BroadcastReceiver {
-	private static final String TAG = "SettingsReceiver";
-	public SettingsReceiver() {
-		Log.i(TAG, "Inside SettingsReceiver");
-	}
+  private static final String TAG = "SettingsReceiver";
+  public SettingsReceiver() {
+    Log.i(TAG, "Inside SettingsReceiver");
+  }
 
-	/**
-	 * {@inheritDoc}
-	 */	
-	public void onReceive(Context context, Intent intent) {
-		String action = intent.getAction();
-		Log.i(TAG, "SettingsReceiver:" + action);
+  /**
+   * {@inheritDoc}
+   */
+  public void onReceive(Context context, Intent intent) {
+    String action = intent.getAction();
+    Log.i(TAG, "SettingsReceiver:" + action);
 
-		// Get the shared preferences to store the new lockscreentype value
-		SharedPreferences sp = context.getSharedPreferences("com.lr.keyguarddisabler_preferences", context.MODE_PRIVATE);
-		SharedPreferences.Editor editor = sp.edit();
-		
-		// Get the value from the intent extra and store it in preference
-		String lockScreenValue = intent.getStringExtra("lockscreentype");
-		Log.i(TAG, "Lock screen value to set: " + lockScreenValue);
-		Boolean done = editor.putString("lockscreentype", lockScreenValue).commit();
-		Log.i(TAG, "Lock screen value from preferences: " + sp.getString("lockscreentype", "not set"));
-	}
+    // Get the shared preferences to store the new lockscreentype value
+    SharedPreferences sp = context.getSharedPreferences("com.lr.keyguarddisabler_preferences", context.MODE_PRIVATE);
+    SharedPreferences.Editor editor = sp.edit();
+
+    // Get the value from the intent extra and store it in preference
+    String lockScreenValue = intent.getStringExtra("lockscreentype");
+    Log.i(TAG, "Lock screen value to set: " + lockScreenValue);
+    Boolean done = editor.putString("lockscreentype", lockScreenValue).commit();
+    Log.i(TAG, "Lock screen value from preferences: " + sp.getString("lockscreentype", "not set"));
+  }
 }
