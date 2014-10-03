@@ -21,6 +21,15 @@ import android.preference.PreferenceManager;
  * This class creates a simplified (lockscreentype only) preference for the tasker/locale
  * plugin. Once the desired preference is set using this plugin, then whenever this task is
  * run the preference will be set through the broadcast receiver.
+ *
+ * <b>Note:</b> This has an unintended consequence where, when the preference is set in the 
+ * plugin for automated task it will actually write the current preference to the file.
+ * <p> e.g. Lets say the current preference is "device".
+ * <p> Now create a task using the plugin to set the preference to "none"
+ * <p> When you go back to the SharedPreferences, the current value is actually "none" which
+ * is not expected since creating tasks is only for automation and should not affect the current
+ * setting. One way to overcome this will be to extend from Activity and create the preference 
+ * layout.
  */
 public class PluginActivity extends PreferenceActivity {
 
