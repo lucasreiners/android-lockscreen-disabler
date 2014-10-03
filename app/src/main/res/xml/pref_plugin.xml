@@ -3,7 +3,7 @@
     <ListPreference
         android:entries="@array/lockscreenType"
         android:entryValues="@array/lockscreenTypeValues"
-        android:key="lockscreentype"
+        android:key="plugin_lockscreentype"
         android:title="@string/pref_lockscreen_type_title"
         android:summary="@string/pref_lockscreen_type_sum"
         android:defaultValue="slide"/>

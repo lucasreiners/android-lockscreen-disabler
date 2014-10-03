@@ -21,17 +21,11 @@ import android.preference.PreferenceManager;
  * This class creates a simplified (lockscreentype only) preference for the tasker/locale
  * plugin. Once the desired preference is set using this plugin, then whenever this task is
  * run the preference will be set through the broadcast receiver.
- *
- * <b>Note:</b> This has an unintended consequence where, when the preference is set in the 
- * plugin for automated task it will actually write the current preference to the file.
- * <p> e.g. Lets say the current preference is "device".
- * <p> Now create a task using the plugin to set the preference to "none"
- * <p> When you go back to the SharedPreferences, the current value is actually "none" which
- * is not expected since creating tasks is only for automation and should not affect the current
- * setting. One way to overcome this will be to extend from Activity and create the preference 
- * layout.
  */
 public class PluginActivity extends PreferenceActivity {
+
+  final String SETTINGS_LOCKSCREENTYPE = "lockscreentype";
+  final String PLUGIN_LOCKSCREENTYPE = "plugin_lockscreentype";
 
   @Override
   protected void onPostCreate(Bundle savedInstanceState) {
@@ -49,7 +43,7 @@ public class PluginActivity extends PreferenceActivity {
     addPreferencesFromResource(R.xml.pref_plugin);
 
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-      ListPreference typePref = (ListPreference) findPreference("lockscreentype");
+      ListPreference typePref = (ListPreference) findPreference(PLUGIN_LOCKSCREENTYPE);
       typePref.setEntries(R.array.lockscreenTypePreJellyBean);
       typePref.setEntryValues(R.array.lockscreenTypeValuesPreJellyBean);
       typePref.setDefaultValue("none");
@@ -62,16 +56,17 @@ public class PluginActivity extends PreferenceActivity {
    */
   @Override
   public void finish() {
-    final String SETTINGS_LOCKSCREENTYPE = "lockscreentype";
 
     PreferenceManager.setDefaultValues(this, R.xml.pref_plugin, true);
     SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
-    final String lockScreenType = sharedPref.getString(SETTINGS_LOCKSCREENTYPE, "notset");
+    // Get the temporary PLUGIN_LOCKSCREENTYPE value
+    final String lockScreenType = sharedPref.getString(PLUGIN_LOCKSCREENTYPE, "notset");
     final String blurb = "Lockscreentype value set: " + lockScreenType;
 
     final Intent resultIntent = new Intent();
     final Bundle resultBundle = new Bundle();
+    // SETTINGS_LOCKSCREENTYPE key/value pair to send to the broadcast receiver
     resultBundle.putString(SETTINGS_LOCKSCREENTYPE, lockScreenType);
     resultIntent.putExtra("com.twofortyfouram.locale.intent.extra.BUNDLE", resultBundle);
     resultIntent.putExtra("com.twofortyfouram.locale.intent.extra.BLURB", blurb);
