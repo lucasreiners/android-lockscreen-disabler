@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.BroadcastReceiver;
 import android.content.SharedPreferences;
 import android.util.Log;
+import android.os.Bundle;
 
 /**
  * The broadcast receiver will receive the intent action and lockscreen disabler preference
@@ -29,14 +30,15 @@ public class SettingsReceiver extends BroadcastReceiver {
   public void onReceive(Context context, Intent intent) {
     String action = intent.getAction();
     Log.i(TAG, "SettingsReceiver:" + action);
+    final Bundle pluginBundle = intent.getBundleExtra("com.twofortyfouram.locale.intent.extra.BUNDLE");
 
     // Get the shared preferences to store the new lockscreentype value
     SharedPreferences sp = context.getSharedPreferences("com.lr.keyguarddisabler_preferences", context.MODE_WORLD_READABLE);
     SharedPreferences.Editor editor = sp.edit();
 
     // Get the value from the intent extra and store it in preference
-    String lockScreenValue = intent.getStringExtra("lockscreentype");
+    String lockScreenValue = pluginBundle.getString("lockscreentype");
     Log.i(TAG, "Lock screen value to set: " + lockScreenValue);
-    Boolean done = editor.putString("lockscreentype", lockScreenValue).commit();
+    editor.putString("lockscreentype", lockScreenValue).commit();
   }
 }
