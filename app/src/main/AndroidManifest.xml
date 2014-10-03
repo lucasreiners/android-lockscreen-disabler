@@ -34,6 +34,11 @@
             </intent-filter>
 
         </activity>
+        <receiver android:name=".SettingsReceiver" >
+            <intent-filter>
+                <action android:name="com.lr.keyguarddisabler.action.SET_PREFERENCE" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
