@@ -1,0 +1,11 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    
+    <ListPreference
+        android:entries="@array/lockscreenType"
+        android:entryValues="@array/lockscreenTypeValues"
+        android:key="plugin_lockscreentype"
+        android:title="@string/pref_lockscreen_type_title"
+        android:summary="@string/pref_lockscreen_type_sum"
+        android:defaultValue="slide"/>
+
+</PreferenceScreen>
