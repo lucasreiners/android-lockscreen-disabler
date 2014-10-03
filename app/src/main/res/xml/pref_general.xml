@@ -15,6 +15,12 @@
         android:title="@string/pref_lockscreen_enforcement_title"
         android:summary="@string/pref_lockscreen_enforcement_sum" 
         android:defaultValue="0"/>
+
+    <CheckBoxPreference
+        android:key="lockscreenonboot"
+        android:title="@string/pref_boot_title"
+        android:summary="@string/pref_boot_title"
+        android:defaultValue="false"/>
     
     <CheckBoxPreference 
         android:key="logtofile"

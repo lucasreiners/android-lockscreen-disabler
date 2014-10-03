@@ -4,6 +4,8 @@
     <string name="pref_lockscreen_type_sum">Select your desired lockscreen type (none or slide-to-unlock)</string>
     <string name="pref_lockscreen_enforcement_title">Lockscreen Enforcement Timeout</string>
     <string name="pref_lockscreen_enforcement_sum">How long before you are forced to re-authenticate (normal Password/Pattern/PIN)</string>
+    <string name="pref_boot_title">Lock on first boot</string>
+    <string name="pref_boot_msg">Require to enter a PIN/password after the first boot to prevent attacker from gaining access by simply rebooting.</string>
     <string name="pref_log_title">Log</string>
     <string name="pref_log_sum">Toggle, if you want to log information and errors to Xposed log and logcat</string>
     <string name="pref_support_title">Support</string>

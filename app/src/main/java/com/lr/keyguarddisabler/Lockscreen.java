@@ -28,6 +28,8 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
     private boolean LOG = false;
     private boolean resecuredStatusBar = false;
     private boolean isLocked = true;
+    private boolean lockonBootup = false;
+
 
     final private static String LOCK_SCREEN_TYPE_NONE = "none";
     final private static String LOCK_SCREEN_TYPE_SLIDE = "slide";
@@ -40,6 +42,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
         lockScreenTimeoutToEnforce = Integer.parseInt(prefs.getString("lockscreentimeout", "1")) * 60 * 1000;
         LOG = prefs.getBoolean("logtofile", false);
         lockScreenType = prefs.getString("lockscreentype", LOCK_SCREEN_TYPE_SLIDE);
+        lockonBootup = prefs.getBoolean("lockscreenonboot", false);
         // Make sure we start any bootup locked...
     }
 
@@ -299,10 +302,12 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
      * Calculates whether to hide the lockscreen based on current enforcement timer values.  Split
      * out into it's own helper method as there are 2 places that utilize this.
      *
+     *  Added a check, whether the user wants to first boot to be secure or not
+     *
      * @return True if we should hide the lockscreen.
      */
     private boolean hideLockBasedOnTimer() {
-        if (lastLockTime == 0) {
+        if (lastLockTime == 0 && lockonBootup) {
             if (LOG) XposedBridge.log("Keyguard Disabler: First boot - lock as normal");
             return false;
         }
