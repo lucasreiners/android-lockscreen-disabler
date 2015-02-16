@@ -60,8 +60,19 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
     @Override
     public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable {
 
+        // Android 5.0
+        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) && (
+                lpparam.packageName.contains("android.keyguard") || lpparam.packageName.contains("com.android.systemui"))) {
+            if (LOG) XposedBridge.log("Keyguard Disabler: Loading Lollipop specific code");
+            hookAllNeededMethods(lpparam,
+                    "com.android.keyguard.KeyguardSecurityModel$SecurityMode",
+                    "com.android.keyguard.KeyguardSecurityModel",
+                    "com.android.systemui.keyguard.KeyguardViewMediator",
+                    "Android 5.0");
+        }
+
         // Android 4.4
-        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) && lpparam.packageName.contains("android.keyguard")) {
+        else if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) && lpparam.packageName.contains("android.keyguard")) {
             if (LOG) XposedBridge.log("Keyguard Disabler: Loading Kitkat specific code");
             hookAllNeededMethods(lpparam,
                     "com.android.keyguard.KeyguardSecurityModel$SecurityMode",
