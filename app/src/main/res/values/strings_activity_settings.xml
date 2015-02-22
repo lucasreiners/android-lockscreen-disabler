@@ -14,6 +14,7 @@
     
     <string name="lockscreen_type_none">No Lockscreen</string>
     <string name="lockscreen_type_slide">Slide-to-unlock</string>
+    <string name="lockscreen_type_smart">Smart Lock (always enabled)</string>
     <string name="lockscreen_type_device">Default (deactivates this mod!)</string>
     <string name="lockscreen_timeout_one">1 minute</string>
     <string name="lockscreen_timeout_five">5 minutes</string>
@@ -21,6 +22,8 @@
     <string name="lockscreen_timeout_twenty">20 minutes</string>
     <string name="lockscreen_timeout_thirty">30 minutes</string>
     <string name="lockscreen_timeout_sixty">60 minutes</string>
+    <string name="lockscreen_timeout_ninety">90 minutes</string>
+    <string name="lockscreen_timeout_onetwenty">120 minutes</string>
     <string name="lockscreen_timeout_never">Never force re-authentication</string>
 
 </resources>

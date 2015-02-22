@@ -3,9 +3,21 @@
     <string-array name="lockscreenType">
         <item name="none">@string/lockscreen_type_none</item>
         <item name="slide">@string/lockscreen_type_slide</item>
+        <item name="device">@string/lockscreen_type_smart</item>
         <item name="device">@string/lockscreen_type_device</item>
     </string-array>
     <string-array name="lockscreenTypeValues">
+        <item name="none">none</item>
+        <item name="slide">slide</item>
+        <item name="device">smart</item>
+        <item name="device">device</item>
+    </string-array>
+    <string-array name="lockscreenTypePreLollipop">
+        <item name="none">@string/lockscreen_type_none</item>
+        <item name="slide">@string/lockscreen_type_slide</item>
+        <item name="device">@string/lockscreen_type_device</item>
+    </string-array>
+    <string-array name="lockscreenTypeValuesPreLollipop">
         <item name="none">none</item>
         <item name="slide">slide</item>
         <item name="device">device</item>
@@ -24,7 +36,9 @@
         <item name="ten">@string/lockscreen_timeout_ten</item>
         <item name="twenty">@string/lockscreen_timeout_twenty</item>        
         <item name="thirty">@string/lockscreen_timeout_thirty</item>        
-        <item name="sixty">@string/lockscreen_timeout_sixty</item>       
+        <item name="sixty">@string/lockscreen_timeout_sixty</item>
+        <item name="ninety">@string/lockscreen_timeout_ninety</item>
+        <item name="onetwenty">@string/lockscreen_timeout_onetwenty</item>
         <item name="never">@string/lockscreen_timeout_never</item>
     </string-array>
     <string-array name="lockscreenTimeoutValues">
@@ -33,7 +47,9 @@
         <item name="ten">10</item>
         <item name="twenty">20</item>        
         <item name="thirty">30</item>        
-        <item name="sixty">60</item>       
+        <item name="sixty">60</item>
+        <item name="ninety">90</item>
+        <item name="onetwenty">120</item>
         <item name="never">0</item>
     </string-array>
 </resources>

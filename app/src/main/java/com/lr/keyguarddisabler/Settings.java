@@ -10,6 +10,7 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
@@ -80,7 +81,49 @@ public class Settings extends PreferenceActivity {
             typePref.setEntryValues(R.array.lockscreenTypeValuesPreJellyBean);
             typePref.setDefaultValue("none");
 		}
+        else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
+        {
+            ListPreference typePref = (ListPreference) findPreference("lockscreentype");
+            typePref.setEntries(R.array.lockscreenTypePreLollipop);
+            typePref.setEntryValues(R.array.lockscreenTypeValuesPreLollipop);
+            typePref.setDefaultValue("none");
+        } else
+        {
+            // If set to 'SMART', we don't support the lockOnBoot option (it's always true), or timeout, so set
+            // it as such and disable things while on SMART
+            final CheckBoxPreference lockOnBoot = (CheckBoxPreference)findPreference("lockscreenonboot");
+            final Preference lockTimeout = findPreference("lockscreentimeout");
+            if (Lockscreen.LOCK_SCREEN_TYPE_SMART.equals(((ListPreference)findPreference("lockscreentype")).getValue()))
+            {
+                lockOnBoot.setChecked(true);
+                lockOnBoot.setEnabled(false);
+                lockTimeout.setEnabled(false);
+            } else
+            {
+                lockOnBoot.setEnabled(true);
+                lockTimeout.setEnabled(true);
+            }
+
+            findPreference("lockscreentype").setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    if (Lockscreen.LOCK_SCREEN_TYPE_SMART.equals((String)newValue))
+                    {
+                        lockOnBoot.setChecked(true);
+                        lockOnBoot.setEnabled(false);
+                        lockTimeout.setEnabled(false);
+                    } else
+                    {
+                        lockOnBoot.setEnabled(true);
+                        lockTimeout.setEnabled(true);
+                    }
+
+                    return true;
+                }
+            });
+        }
 	}
+
 
 	/** {@inheritDoc} */
 	@Override
@@ -148,6 +191,47 @@ public class Settings extends PreferenceActivity {
 	            typePref.setEntryValues(R.array.lockscreenTypeValuesPreJellyBean);
 	            typePref.setDefaultValue("none");
 	        }
+            else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
+            {
+                ListPreference typePref = (ListPreference) findPreference("lockscreentype");
+                typePref.setEntries(R.array.lockscreenTypePreLollipop);
+                typePref.setEntryValues(R.array.lockscreenTypeValuesPreLollipop);
+                typePref.setDefaultValue("none");
+            } else
+            {
+                // If set to 'SMART', we don't support the lockOnBoot option (it's always true), or timeout, so set
+                // it as such and disable things while on SMART
+                final CheckBoxPreference lockOnBoot = (CheckBoxPreference)findPreference("lockscreenonboot");
+                final Preference lockTimeout = findPreference("lockscreentimeout");
+                if (Lockscreen.LOCK_SCREEN_TYPE_SMART.equals(((ListPreference)findPreference("lockscreentype")).getValue()))
+                {
+                    lockOnBoot.setChecked(true);
+                    lockOnBoot.setEnabled(false);
+                    lockTimeout.setEnabled(false);
+                } else
+                {
+                    lockOnBoot.setEnabled(true);
+                    lockTimeout.setEnabled(true);
+                }
+
+                findPreference("lockscreentype").setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object newValue) {
+                        if (Lockscreen.LOCK_SCREEN_TYPE_SMART.equals((String)newValue))
+                        {
+                            lockOnBoot.setChecked(true);
+                            lockOnBoot.setEnabled(false);
+                            lockTimeout.setEnabled(false);
+                        } else
+                        {
+                            lockOnBoot.setEnabled(true);
+                            lockTimeout.setEnabled(true);
+                        }
+
+                        return true;
+                    }
+                });
+            }
 		}
 	}
 }
