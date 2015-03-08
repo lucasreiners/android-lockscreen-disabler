@@ -31,9 +31,10 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
     private boolean lockonBootup = false;
 
 
-    final private static String LOCK_SCREEN_TYPE_NONE = "none";
-    final private static String LOCK_SCREEN_TYPE_SLIDE = "slide";
-    final private static String LOCK_SCREEN_TYPE_DEVICE = "device";
+    final static String LOCK_SCREEN_TYPE_NONE = "none";
+    final static String LOCK_SCREEN_TYPE_SLIDE = "slide";
+    final static String LOCK_SCREEN_TYPE_SMART = "smart";
+    final static String LOCK_SCREEN_TYPE_DEVICE = "device";
 
     @Override
     public void initZygote(StartupParam startupParam) throws Throwable {
@@ -55,6 +56,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
         lockScreenTimeoutToEnforce = Integer.parseInt(prefs.getString("lockscreentimeout", "1")) * 60 * 1000;
         LOG = prefs.getBoolean("logtofile", false);
         lockScreenType = prefs.getString("lockscreentype", LOCK_SCREEN_TYPE_SLIDE);
+        lockonBootup = prefs.getBoolean("lockscreenonboot", false);
     }
 
     @Override
@@ -142,6 +144,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                     // This is for settings - so no need to hide based on a timer since by definition we're unlocked if this triggers.
+                    reloadPrefs();
                     if (lockScreenType.equals(LOCK_SCREEN_TYPE_SLIDE)) {
                         param.setResult(false);
                     }
@@ -150,12 +153,51 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
             });
         }
 
+        else if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) && lpparam.packageName.equals("com.google.android.gms")) {
+            try {
+                XposedHelpers.findAndHookMethod("android.service.trust.TrustAgentService", lpparam.classLoader, "revokeTrust", new XC_MethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                        reloadPrefs();
+                        if (lockScreenType.equals(LOCK_SCREEN_TYPE_SMART)) {
+                            if (LOG) XposedBridge.log("Keyguard Disabler:  - ignoring revokeTrust...");
+                            param.setResult(null);
+                        }
+                    }
+                });
+                // If this is set up to manage trust, then we'll immediately call grantTrust regardless.  This means you
+                // will need to restart the phone or re-toggle the trust agent enablement when you switch to SMART
+                XposedHelpers.findAndHookMethod("android.service.trust.TrustAgentService", lpparam.classLoader, "setManagingTrust", boolean.class, new XC_MethodHook() {
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        reloadPrefs();
+                        if (lockScreenType.equals(LOCK_SCREEN_TYPE_SMART) && (Boolean) param.args[0]) {
+                            if (LOG) XposedBridge.log("Keyguard Disabler: Granting Trust automatically on agent startup...");
+                            XposedHelpers.callMethod(param.thisObject, "grantTrust", "Trust granted from Keyguard Disabler Xposed module", 0L, false);
+                        } else if (lockScreenType.equals(LOCK_SCREEN_TYPE_SMART))
+                        {
+                            if (LOG) XposedBridge.log("Keyguard Disabler: You have SMART set for lock screen type, but aren't managing trust with it.");
+                        }
+                    }
+                });
+            } catch (ClassNotFoundError e)
+            {
+                if (LOG)
+                    XposedBridge.log("Keyguard Disabler: Unable to load GoogleTrustAgent for SMART lockscreen.  Do you have smart lockscreen? "+e.getMessage());
+            } catch (NoSuchMethodError e)
+            {
+                if (LOG)
+                    XposedBridge.log("Keyguard Disabler: Unable to load a method for SMART lockscreen.  Do you have smart lockscreen? "+e.getMessage());
+            }
+        }
+
         // Else, we didn't find the package.
         else {
             // Add a log of what packages we are NOT hooking for debug purposes.  This helps us identify
             // if there are weird OEM keyguard packages (such as HTC) that we can try and handle.  This
             // Will pollute the log, but should prove helpful (and is off by default).
-            if (LOG) XposedBridge.log("Keyguard Disabler: Avoid Hooking package: " + lpparam.packageName);
+            // Commenting this out as it's too verbose - if needed one can supply a special build
+            //if (LOG) XposedBridge.log("Keyguard Disabler: Avoid Hooking package: " + lpparam.packageName);
         }
     }
 
@@ -286,8 +328,9 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
                     // that this method gets called.  We'll reload on lock...
 
                     // If they requested 'device' - this means they want the mod basically disabled,
-                    // so we'll honor the device settings.
-                    if (lockScreenType.equals(LOCK_SCREEN_TYPE_DEVICE)) {
+                    // so we'll honor the device settings.  If this is SMART, we'll also stick with
+                    // the system settings.
+                    if (lockScreenType.equals(LOCK_SCREEN_TYPE_DEVICE) || lockScreenType.equals(LOCK_SCREEN_TYPE_SMART)) {
                         return;
                     }
 
