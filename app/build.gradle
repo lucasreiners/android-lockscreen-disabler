@@ -9,10 +9,21 @@ android {
         targetSdkVersion 21
     }
 
+    signingConfigs {
+        release {
+            storeFile file(System.env[ 'KEYSTORE' ])
+            storePassword System.env[ 'KSTOREPWD' ]
+            keyAlias "lockscreendisabler"
+            keyPassword System.env[ 'KEYPWD' ]
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false // http://stackoverflow.com/a/27441250/801334
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            if(System.env[ 'KEYSTORE' ] && System.env[ 'KSTOREPWD' ] && System.env[ 'KEYPWD' ])
+                signingConfig signingConfigs.release
         }
     }
 }
