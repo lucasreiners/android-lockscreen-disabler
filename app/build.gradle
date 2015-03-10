@@ -11,7 +11,7 @@ android {
 
     signingConfigs { // Set by build server or, alternatively, by setting the environment variables in your IDE / terminal before building. See http://developer.android.com/tools/publishing/app-signing.html
         release {
-            storeFile System.env[ 'KEYSTORE' ]?.with(file(it)) ?: file(System.console().readLine("\nKeystore file path: "))
+            storeFile System.env[ 'KEYSTORE' ]?.with{file(it)} ?: file(System.console().readLine("\nKeystore file path: "))
             storePassword System.env[ 'KSTOREPWD' ] ?: System.console().readLine("\nKeystore password: ")
             keyAlias System.env[ 'KEYALIAS' ] ?: "lockscreendisabler" // defaults to the latter
             keyPassword System.env[ 'KEYPWD' ] ?: System.console().readLine("\nKey password for alias '${keyAlias}': ")
