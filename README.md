@@ -3,7 +3,7 @@ Android Lockscreen Disabler
 
 [![Build Status](http://www.griffenfeld.dk:8080/job/LockscreenDisabler/badge/icon)](http://www.griffenfeld.dk:8080/job/LockscreenDisabler/lastBuild/)
 
-A module that simply hooks into the lockscreen's callback, wether there is a password required and mocks, that there is no password needed for unlocking the device. As the password is still active in the background, other apps (especially the apps that enforce such password policies) will never notice this little hack.
+A module that simply hooks into the lockscreen's callback, whether there is a password required and mocks, that there is no password needed for unlocking the device. As the password is still active in the background, other apps (especially the apps that enforce such password policies) will never notice this little hack.
 
 About
 ----
@@ -44,4 +44,3 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
