@@ -139,18 +139,21 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
         else if (lpparam.packageName.equals("com.android.settings")) {
             // This allows the settings app to show that 'Swipe' is the default, and therefore gives the ability to customize
             // your swipe settings
-            XposedHelpers.findAndHookMethod("com.android.internal.widget.LockPatternUtils", lpparam.classLoader, "isSecure", new XC_MethodHook() {
-
+            XC_MethodHook isSecureMethodHook = new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                    // This is for settings - so no need to hide based on a timer since by definition we're unlocked if this triggers.
                     reloadPrefs();
                     if (lockScreenType.equals(LOCK_SCREEN_TYPE_SLIDE)) {
                         param.setResult(false);
                     }
                     if (LOG) XposedBridge.log("Keyguard Disabler: isSecure called by: " + lpparam.packageName);
                 }
-            });
+            };
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                XposedHelpers.findAndHookMethod("com.android.internal.widget.LockPatternUtil", lpparam.classLoader, "isSecure", int.class, isSecureMethodHook);
+            } else {
+                XposedHelpers.findAndHookMethod("com.android.internal.widget.LockPatternUtil", lpparam.classLoader, "isSecure", isSecureMethodHook);
+            }
         }
 
         else if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) && lpparam.packageName.equals("com.google.android.gms")) {
@@ -304,7 +307,14 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
             final Object securityModeNone = XposedHelpers.getStaticObjectField(securityModeEnum, "None");
             final Object securityModePattern = XposedHelpers.getStaticObjectField(securityModeEnum, "Pattern");
             final Object securityModePin = XposedHelpers.getStaticObjectField(securityModeEnum, "PIN");
-            final Object securityModeBiometric = XposedHelpers.getStaticObjectField(securityModeEnum, "Biometric");
+            final Object securityModeBiometric;
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
+            {
+                securityModeBiometric = XposedHelpers.getStaticObjectField(securityModeEnum, "Biometric");
+            } else
+            {
+                securityModeBiometric = "bad_field - no biometric in marshmallow";
+            }
             // LG KnockOn - likely doesn't work for other knock on implementations...
             Object tmpField;
             try {

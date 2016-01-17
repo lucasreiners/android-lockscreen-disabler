@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 android {
-    compileSdkVersion 21
+    compileSdkVersion 23
     buildToolsVersion '21.1.2'
 
     defaultConfig {
         applicationId "com.lr.keyguarddisabler"
         minSdkVersion 10
-        targetSdkVersion 21
+        targetSdkVersion 23
     }
 
     signingConfigs { // Set by build server or, alternatively, by setting the environment variables in your IDE / terminal before building. See http://developer.android.com/tools/publishing/app-signing.html
