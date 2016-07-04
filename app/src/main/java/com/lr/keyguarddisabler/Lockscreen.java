@@ -4,6 +4,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 
+import java.lang.reflect.Method;
+
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
 import de.robv.android.xposed.XC_MethodHook;
@@ -29,6 +31,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
     private boolean resecuredStatusBar = false;
     private boolean isLocked = true;
     private boolean lockonBootup = false;
+    private boolean handleHideWithBoolean = false;
 
 
     final static String LOCK_SCREEN_TYPE_NONE = "none";
@@ -61,6 +64,27 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
 
     @Override
     public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable {
+
+        // OxygenOS 2.1.0
+        /**
+         * Depending on the device model, KeyGuardViewMediator#handleHide may have different signatures.
+         * Normally, no parameters are declared. On OxygenOS 2.1.0 (OnePlus Two), however, a boolean
+         * parameter is expected.  Unfortunately, checking for the device model and using the appropriate
+         * signature did not work in my case. Trying to load the method, catching error, and trying again
+         * with boolean param results in a crash dump. So we will check the method signature by reflection
+         * instead. This is not beautiful, but it works.
+         */
+        if (lpparam.packageName.contains("com.android.systemui")) {
+            Class kvm = XposedHelpers.findClass("com.android.systemui.keyguard.KeyguardViewMediator",
+                    lpparam.classLoader);
+            if (LOG) XposedBridge.log("Keyguard Disabler: Detecting 'handleHide' method signature");
+            Method[] ms = kvm.getDeclaredMethods();
+            for (Method m : ms) {
+                if (m.getName() == "handleHide") {
+                    this.handleHideWithBoolean = (m.getParameterTypes().length > 0);
+                }
+            }
+        }
 
         // Android 5.0
         if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) && (
@@ -150,9 +174,9 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
                 }
             };
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                XposedHelpers.findAndHookMethod("com.android.internal.widget.LockPatternUtil", lpparam.classLoader, "isSecure", int.class, isSecureMethodHook);
+                XposedHelpers.findAndHookMethod("com.android.internal.widget.LockPatternUtils", lpparam.classLoader, "isSecure", int.class, isSecureMethodHook);
             } else {
-                XposedHelpers.findAndHookMethod("com.android.internal.widget.LockPatternUtil", lpparam.classLoader, "isSecure", isSecureMethodHook);
+                XposedHelpers.findAndHookMethod("com.android.internal.widget.LockPatternUtils", lpparam.classLoader, "isSecure", isSecureMethodHook);
             }
         }
 
@@ -246,7 +270,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
         // time we care about the lockscreen going away is on initial bootup.  We always want
         // the normal lock to show on initial bootup to ensure somebody can't just reboot the
         // phone to get access...
-        XposedHelpers.findAndHookMethod(mediatorClassName, lpparam.classLoader, "handleHide", new XC_MethodHook() {
+        XC_MethodHook handleHideMethodHook = new XC_MethodHook() {
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                 if (LOG) XposedBridge.log("Keyguard Disabler: About to unlock...");
@@ -256,7 +280,13 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
                     lastLockTime = SystemClock.elapsedRealtime();
                 }
             }
-        });
+        };
+        if (this.handleHideWithBoolean) {
+            // On the OnePlus Two (OxygenOS 2.1.0 tested only), handleHide(.) has a boolean param!
+            XposedHelpers.findAndHookMethod(mediatorClassName, lpparam.classLoader, "handleHide", boolean.class, handleHideMethodHook);
+        } else {
+            XposedHelpers.findAndHookMethod(mediatorClassName, lpparam.classLoader, "handleHide", handleHideMethodHook);
+        }
 
         // handleShow has 2 different method signatures depending on SDK version
         XC_MethodHook handleShowMethodHook = new XC_MethodHook() {
