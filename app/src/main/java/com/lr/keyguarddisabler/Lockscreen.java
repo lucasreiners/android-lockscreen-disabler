@@ -4,6 +4,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
@@ -31,7 +32,6 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
     private boolean resecuredStatusBar = false;
     private boolean isLocked = true;
     private boolean lockonBootup = false;
-    private boolean handleHideWithBoolean = false;
 
 
     final static String LOCK_SCREEN_TYPE_NONE = "none";
@@ -64,28 +64,6 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
 
     @Override
     public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable {
-
-        // OxygenOS 2.1.0
-        /**
-         * Depending on the device model, KeyGuardViewMediator#handleHide may have different signatures.
-         * Normally, no parameters are declared. On OxygenOS 2.1.0 (OnePlus Two), however, a boolean
-         * parameter is expected.  Unfortunately, checking for the device model and using the appropriate
-         * signature did not work in my case. Trying to load the method, catching error, and trying again
-         * with boolean param results in a crash dump. So we will check the method signature by reflection
-         * instead. This is not beautiful, but it works.
-         */
-        if (lpparam.packageName.contains("com.android.systemui")) {
-            Class kvm = XposedHelpers.findClass("com.android.systemui.keyguard.KeyguardViewMediator",
-                    lpparam.classLoader);
-            if (LOG) XposedBridge.log("Keyguard Disabler: Detecting 'handleHide' method signature");
-            Method[] ms = kvm.getDeclaredMethods();
-            for (Method m : ms) {
-                if (m.getName() == "handleHide") {
-                    this.handleHideWithBoolean = (m.getParameterTypes().length > 0);
-                }
-            }
-        }
-
         // Android 5.0
         if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) && (
                 lpparam.packageName.contains("android.keyguard") || lpparam.packageName.contains("com.android.systemui"))) {
@@ -173,10 +151,20 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
                     if (LOG) XposedBridge.log("Keyguard Disabler: isSecure called by: " + lpparam.packageName);
                 }
             };
+            // Check whether LockPatternUtil or LockPatternUtils exists (depends on ROM).
+            if (LOG) XposedBridge.log("Keyguard Disabler: Detecting LockPatternUtil(s)");
+            Class lpu;
+            try {
+                // XposedHelpers.findClassIfExists may not be present, so use a try-catch block.
+                lpu = XposedHelpers.findClass("com.android.internal.widget.LockPatternUtil", lpparam.classLoader);
+            } catch (ClassNotFoundError cnfe) {
+                lpu = XposedHelpers.findClass("com.android.internal.widget.LockPatternUtils", lpparam.classLoader);
+            }
+            if (LOG) XposedBridge.log("Keyguard Disabler:    found as " + lpu.getName());
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                XposedHelpers.findAndHookMethod("com.android.internal.widget.LockPatternUtils", lpparam.classLoader, "isSecure", int.class, isSecureMethodHook);
+                XposedHelpers.findAndHookMethod(lpu, "isSecure", int.class, isSecureMethodHook);
             } else {
-                XposedHelpers.findAndHookMethod("com.android.internal.widget.LockPatternUtils", lpparam.classLoader, "isSecure", isSecureMethodHook);
+                XposedHelpers.findAndHookMethod(lpu, "isSecure", isSecureMethodHook);
             }
         }
 
@@ -281,11 +269,22 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
                 }
             }
         };
-        if (this.handleHideWithBoolean) {
-            // On the OnePlus Two (OxygenOS 2.1.0 tested only), handleHide(.) has a boolean param!
-            XposedHelpers.findAndHookMethod(mediatorClassName, lpparam.classLoader, "handleHide", boolean.class, handleHideMethodHook);
+        // handleHide has different method signatures depending on OS flavor.
+        if (LOG) XposedBridge.log("Keyguard Disabler: Hooking handleHide...");
+        Member handleHide = null;
+        Class kvm = XposedHelpers.findClass("com.android.systemui.keyguard.KeyguardViewMediator",
+                lpparam.classLoader);
+        Method[] ms = kvm.getDeclaredMethods();
+        for (Method m : ms) {
+            if (m.getName() == "handleHide") {
+                handleHide = m;
+            }
+        }
+        if (handleHide != null) {
+            XposedBridge.hookMethod(handleHide, handleHideMethodHook);
+            if (LOG) XposedBridge.log("Keyguard Disabler: ...handleHide hook installed.");
         } else {
-            XposedHelpers.findAndHookMethod(mediatorClassName, lpparam.classLoader, "handleHide", handleHideMethodHook);
+            if (LOG) XposedBridge.log("Keyguard Disabler: ...handleHide hook failed!");
         }
 
         // handleShow has 2 different method signatures depending on SDK version
