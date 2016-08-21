@@ -4,6 +4,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
 import de.robv.android.xposed.XC_MethodHook;
@@ -61,7 +64,6 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
 
     @Override
     public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable {
-
         // Android 5.0
         if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) && (
                 lpparam.packageName.contains("android.keyguard") || lpparam.packageName.contains("com.android.systemui"))) {
@@ -149,10 +151,20 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
                     if (LOG) XposedBridge.log("Keyguard Disabler: isSecure called by: " + lpparam.packageName);
                 }
             };
+            // Check whether LockPatternUtil or LockPatternUtils exists (depends on ROM).
+            if (LOG) XposedBridge.log("Keyguard Disabler: Detecting LockPatternUtil(s)");
+            Class lpu;
+            try {
+                // XposedHelpers.findClassIfExists may not be present, so use a try-catch block.
+                lpu = XposedHelpers.findClass("com.android.internal.widget.LockPatternUtil", lpparam.classLoader);
+            } catch (ClassNotFoundError cnfe) {
+                lpu = XposedHelpers.findClass("com.android.internal.widget.LockPatternUtils", lpparam.classLoader);
+            }
+            if (LOG) XposedBridge.log("Keyguard Disabler:    found as " + lpu.getName());
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                XposedHelpers.findAndHookMethod("com.android.internal.widget.LockPatternUtil", lpparam.classLoader, "isSecure", int.class, isSecureMethodHook);
+                XposedHelpers.findAndHookMethod(lpu, "isSecure", int.class, isSecureMethodHook);
             } else {
-                XposedHelpers.findAndHookMethod("com.android.internal.widget.LockPatternUtil", lpparam.classLoader, "isSecure", isSecureMethodHook);
+                XposedHelpers.findAndHookMethod(lpu, "isSecure", isSecureMethodHook);
             }
         }
 
@@ -246,7 +258,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
         // time we care about the lockscreen going away is on initial bootup.  We always want
         // the normal lock to show on initial bootup to ensure somebody can't just reboot the
         // phone to get access...
-        XposedHelpers.findAndHookMethod(mediatorClassName, lpparam.classLoader, "handleHide", new XC_MethodHook() {
+        XC_MethodHook handleHideMethodHook = new XC_MethodHook() {
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                 if (LOG) XposedBridge.log("Keyguard Disabler: About to unlock...");
@@ -256,7 +268,24 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
                     lastLockTime = SystemClock.elapsedRealtime();
                 }
             }
-        });
+        };
+        // handleHide has different method signatures depending on OS flavor.
+        if (LOG) XposedBridge.log("Keyguard Disabler: Hooking handleHide...");
+        Member handleHide = null;
+        Class kvm = XposedHelpers.findClass("com.android.systemui.keyguard.KeyguardViewMediator",
+                lpparam.classLoader);
+        Method[] ms = kvm.getDeclaredMethods();
+        for (Method m : ms) {
+            if (m.getName() == "handleHide") {
+                handleHide = m;
+            }
+        }
+        if (handleHide != null) {
+            XposedBridge.hookMethod(handleHide, handleHideMethodHook);
+            if (LOG) XposedBridge.log("Keyguard Disabler: ...handleHide hook installed.");
+        } else {
+            if (LOG) XposedBridge.log("Keyguard Disabler: ...handleHide hook failed!");
+        }
 
         // handleShow has 2 different method signatures depending on SDK version
         XC_MethodHook handleShowMethodHook = new XC_MethodHook() {
