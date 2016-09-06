@@ -1,4 +1,7 @@
 dependencies:
   pre:
     - openssl aes-256-cbc -d -in $KEYSTORE.enc -k "$KEYSTORE_DECRYPT_KEY" > $KEYSTORE
-
+test:
+  post:
+    - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+    - find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
