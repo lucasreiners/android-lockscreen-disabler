@@ -359,7 +359,7 @@ public class Lockscreen implements IXposedHookLoadPackage, IXposedHookZygoteInit
             // We use the afterHook here to let the normal method handle all the logic of what the
             // security mode should be.  If the normal method returns that it is a password, pin
             // etc., and we want to override it (based on time), then we'll return None instead.
-            XposedHelpers.findAndHookMethod(outerClassName, lpparam.classLoader, "getSecurityMode", new XC_MethodHook() {
+            XposedHelpers.findAndHookMethod(outerClassName, lpparam.classLoader, "getSecurityMode", int.class, new XC_MethodHook() {
 
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {

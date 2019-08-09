@@ -5,6 +5,8 @@ Android Lockscreen Disabler
 
 A module that simply hooks into the lockscreen's callback, whether there is a password required and mocks, that there is no password needed for unlocking the device. As the password is still active in the background, other apps (especially the apps that enforce such password policies) will never notice this little hack.
 
+This fork was modified to support Android 8 and beyond.
+
 About
 ----
 
